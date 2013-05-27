@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NetworksLab4Middleware.Classes
 {
-    class ClientConnect
+    class ClientConnection
     {
     }
 }
