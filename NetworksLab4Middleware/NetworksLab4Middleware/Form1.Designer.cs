@@ -43,6 +43,10 @@
             this.myIPTextbox = new System.Windows.Forms.TextBox();
             this.server2IPTextbox = new System.Windows.Forms.TextBox();
             this.server2IPLabel = new System.Windows.Forms.Label();
+            this.paceTextbox = new System.Windows.Forms.TextBox();
+            this.paceLabel = new System.Windows.Forms.Label();
+            this.msgCountLabel = new System.Windows.Forms.Label();
+            this.msgCountTextbox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // server1IPLabel
@@ -186,11 +190,47 @@
             this.server2IPLabel.TabIndex = 13;
             this.server2IPLabel.Text = "Server  2 IP Address";
             // 
+            // paceTextbox
+            // 
+            this.paceTextbox.Location = new System.Drawing.Point(270, 53);
+            this.paceTextbox.Name = "paceTextbox";
+            this.paceTextbox.Size = new System.Drawing.Size(81, 20);
+            this.paceTextbox.TabIndex = 14;
+            // 
+            // paceLabel
+            // 
+            this.paceLabel.AutoSize = true;
+            this.paceLabel.Location = new System.Drawing.Point(270, 37);
+            this.paceLabel.Name = "paceLabel";
+            this.paceLabel.Size = new System.Drawing.Size(32, 13);
+            this.paceLabel.TabIndex = 15;
+            this.paceLabel.Text = "Pace";
+            // 
+            // msgCountLabel
+            // 
+            this.msgCountLabel.AutoSize = true;
+            this.msgCountLabel.Location = new System.Drawing.Point(270, 76);
+            this.msgCountLabel.Name = "msgCountLabel";
+            this.msgCountLabel.Size = new System.Drawing.Size(58, 13);
+            this.msgCountLabel.TabIndex = 16;
+            this.msgCountLabel.Text = "Msg Count";
+            // 
+            // msgCountTextbox
+            // 
+            this.msgCountTextbox.Location = new System.Drawing.Point(270, 92);
+            this.msgCountTextbox.Name = "msgCountTextbox";
+            this.msgCountTextbox.Size = new System.Drawing.Size(81, 20);
+            this.msgCountTextbox.TabIndex = 17;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(278, 369);
+            this.ClientSize = new System.Drawing.Size(372, 369);
+            this.Controls.Add(this.msgCountTextbox);
+            this.Controls.Add(this.msgCountLabel);
+            this.Controls.Add(this.paceLabel);
+            this.Controls.Add(this.paceTextbox);
             this.Controls.Add(this.server2IPTextbox);
             this.Controls.Add(this.server2IPLabel);
             this.Controls.Add(this.myIPTextbox);
@@ -230,6 +270,10 @@
         private System.Windows.Forms.TextBox myIPTextbox;
         private System.Windows.Forms.TextBox server2IPTextbox;
         private System.Windows.Forms.Label server2IPLabel;
+        private System.Windows.Forms.TextBox paceTextbox;
+        private System.Windows.Forms.Label paceLabel;
+        private System.Windows.Forms.Label msgCountLabel;
+        private System.Windows.Forms.TextBox msgCountTextbox;
     }
 }
 

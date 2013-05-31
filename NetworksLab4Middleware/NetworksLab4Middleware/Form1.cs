@@ -38,8 +38,27 @@ namespace NetworksLab4Middleware
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            Classes.HostConnection server = new Classes.HostConnection(
-                deviceDropDown.SelectedIndex, testDataTextbox);
+            Classes.HostConnection server;
+
+            if (server2IPTextbox.Text.Equals(String.Empty))
+            { 
+                server = new Classes.HostConnection(
+                    deviceDropDown.SelectedIndex, 
+                    server1IPTextbox.Text, 
+                    Convert.ToInt32(msgCountTextbox.Text), 
+                    Convert.ToInt32(paceTextbox.Text), 
+                    testDataTextbox);
+            }
+            else
+            {
+                    server = new Classes.HostConnection(
+                    deviceDropDown.SelectedIndex, 
+                    server1IPTextbox.Text, 
+                    server2IPTextbox.Text, 
+                    Convert.ToInt32(msgCountTextbox.Text), 
+                    Convert.ToInt32(paceTextbox.Text),
+                    testDataTextbox);
+            }
 
             server.Start();
         }
@@ -52,6 +71,7 @@ namespace NetworksLab4Middleware
             testDataTextbox.Text = "";
             deviceDropDown.SelectedIndex = 0;
             deviceListTextbox.Text = "";
+            paceTextbox.Text = "";
         }
     }
 }

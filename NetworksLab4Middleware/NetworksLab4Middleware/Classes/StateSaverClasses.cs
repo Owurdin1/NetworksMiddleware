@@ -15,7 +15,7 @@ namespace NetworksLab4Middleware.Classes
         public Thread clientThread = null;
         public List<byte[]> clientMessages = null;
         public Stopwatch clientStopWatch = null;
-
+        
         public ClientStateSaver()
         {
             clientStopWatch = new Stopwatch();
@@ -28,6 +28,7 @@ namespace NetworksLab4Middleware.Classes
         public Thread serverThread = null;
         public List<byte[]> serverMessages = null;
         public Stopwatch serverStopWatch = null;
+        public ClientConnection localClient = new ClientConnection();
 
         public ServerStateSaver()
         {

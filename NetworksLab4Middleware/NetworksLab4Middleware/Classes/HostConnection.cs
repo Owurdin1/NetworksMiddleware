@@ -17,35 +17,78 @@ namespace NetworksLab4Middleware.Classes
         private const int BUFFER_SIZE = 256;
         private const int LENGTH_BITS = 2;
         private const int PORT = 2605;
-        private const int MAX_MESSAGES = 5000;
 
         // Private class variables
         private Socket sock = null;
         private int wirelessNicIndex = 0;
         private System.Windows.Forms.RichTextBox testDataTextbox;
         private Thread acceptThread = null;
-        private string localServerIP = string.Empty;
+        private IPAddress localServerIP;
+        private IPAddress endPoint1;
+        private IPAddress endPoint2;
+        private bool bonus = false;
+        private int msgCount = 0;
+        private int pace = 0;
 
 
         /// <summary>
-        /// Non-default constructor. Used to set up
-        /// server variables to begin server thread
-        /// management.
+        /// Non-Default constructor, takes 2 endPoints for
+        /// the bonus portion of assignment
         /// </summary>
-        /// <param name="localIP">
-        /// IP Address of the network device being used
-        /// to host server.
-        /// </param>
         /// <param name="wirelessNicIndex">
-        /// Network device index value to set for server
+        /// index to set the wirelss nic to
+        /// </param>
+        /// <param name="endPoint1">
+        /// server 1 endPoint ip Address
+        /// </param>
+        /// <param name="msgCount">
+        /// number of messages to send/receive
+        /// </param>
+        /// <param name="pace">
+        /// pause for the client pace
         /// </param>
         /// <param name="testDataTextbox">
-        /// RichTextbox to print test data to for debugging work.
+        /// local output box to print debug/error messages
         /// </param>
-        public HostConnection(int wirelessNicIndex, System.Windows.Forms.RichTextBox testDataTextbox)
+        public HostConnection(int wirelessNicIndex, string endPoint1, int msgCount, int pace, System.Windows.Forms.RichTextBox testDataTextbox)
         {
-            //this.localIP = localIP;
             this.wirelessNicIndex = wirelessNicIndex;
+            this.endPoint1 = IPAddress.Parse(endPoint1);
+            this.msgCount = msgCount;
+            this.pace = pace;
+            this.testDataTextbox = testDataTextbox;
+        }
+
+        /// <summary>
+        /// Non-Default constructor, takes 2 endPoints for
+        /// the bonus portion of assignment
+        /// </summary>
+        /// <param name="wirelessNicIndex">
+        /// index to set the wirelss nic to
+        /// </param>
+        /// <param name="endPoint1">
+        /// server 1 endPoint ip Address
+        /// </param>
+        /// <param name="endPoint2">
+        /// server 2 endPoint ip address
+        /// </param>
+        /// <param name="msgCount">
+        /// number of messages to send/receive
+        /// </param>
+        /// <param name="pace">
+        /// pause for the client pace
+        /// </param>
+        /// <param name="testDataTextbox">
+        /// local output box to print debug/error messages
+        /// </param>
+        public HostConnection(int wirelessNicIndex, string endPoint1, string endPoint2, int msgCount, int pace, System.Windows.Forms.RichTextBox testDataTextbox)
+        {
+            this.wirelessNicIndex = wirelessNicIndex;
+            this.endPoint1 = IPAddress.Parse(endPoint1);
+            this.endPoint2 = IPAddress.Parse(endPoint2);
+            this.msgCount = msgCount;
+            this.pace = pace;
+            bonus = true;
             this.testDataTextbox = testDataTextbox;
         }
 
@@ -70,7 +113,7 @@ namespace NetworksLab4Middleware.Classes
             // Get local information
             IPHostEntry localIP = Dns.GetHostEntry(Dns.GetHostName());
             IPEndPoint localEndPoint = new IPEndPoint(localIP.AddressList[wirelessNicIndex], PORT);
-            localServerIP = localEndPoint.ToString().Split(':')[0];
+            localServerIP = IPAddress.Parse(localEndPoint.ToString().Split(':')[0]);
 
             // Set up host socket
             sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -78,18 +121,55 @@ namespace NetworksLab4Middleware.Classes
             sock.Listen((int)SocketOptionName.MaxConnections);
         }
 
+        /// <summary>
+        /// Accepts connections from clients
+        /// </summary>
         private void AcceptConnections()
         {
             Socket socket = null;
 
+            // Accept connection from client
             try
             {
-
+                socket = sock.Accept();
             }
             catch (Exception e)
             {
                 testDataTextbox.Text += "ERROR! " + e.Message;
             }
+
+            // Set up the server state saver
+            ServerStateSaver serverState = new ServerStateSaver();
+            serverState.serverSocket = socket;
+            serverState.serverStopWatch.Start();
+
+            // Set up the local client connection
+            serverState.localClient = new ClientConnection();
+            serverState.localClient.ServerState = serverState;
+            serverState.localClient.testDataTextbox = testDataTextbox;
+
+            // Connect to the endpoint server
+            serverState.localClient.Start();
+
+            // Set up and start thread on connection handler function
+            serverState.serverThread = new Thread(delegate()
+                {
+                    ConnectionHandler(serverState);
+                });
+
+            serverState.serverThread.Start();
+        }
+
+        /// <summary>
+        /// Handles the connection to the client
+        /// </summary>
+        /// <param name="serverState">
+        /// ServerStateSaver object to access
+        /// current properties dynamically.
+        /// </param>
+        private void ConnectionHandler(ServerStateSaver serverState)
+        {
+
         }
     }
 }
