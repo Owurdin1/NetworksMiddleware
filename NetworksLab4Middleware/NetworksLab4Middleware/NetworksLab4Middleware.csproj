@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\ClientConnection.cs" />
+    <Compile Include="Classes\LogBuilder.cs" />
     <Compile Include="Classes\StateSaverClasses.cs" />
     <Compile Include="Classes\ResponseBuilder.cs" />
     <Compile Include="Classes\HostConnection.cs" />

@@ -53,6 +53,13 @@ namespace NetworksLab4Middleware.Classes
             set { serverState = value; }
         }
 
+
+        public IPAddress EndPoint
+        {
+            get { return endPoint; }
+            set { endPoint = value; }
+        }
+
         /// <summary>
         /// Setup and connect to the endpoint server
         /// </summary>
@@ -63,12 +70,16 @@ namespace NetworksLab4Middleware.Classes
             clientState.clientStopWatch.Start();
 
             // Set up thread and begin handling connection
-            clientState.clientThread = new Thread(delegate()
-                {
-                    ConnectionHandler(clientState);
-                });
+            // Don't want to start thread to handle connection until
+            // after recieving data from the server. Adding a new 
+            // function that creates a thread and allows the server to
+            // keep doing it's business will be required to make this work.
+            //clientState.clientThread = new Thread(delegate()
+            //    {
+            //        ConnectionHandler(clientState);
+            //    });
 
-            clientState.clientThread.Start();
+            //clientState.clientThread.Start();
         }
 
         /// <summary>

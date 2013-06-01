@@ -31,6 +31,9 @@ namespace NetworksLab4Middleware.Classes
         private int pace = 0;
         private Object receiveLock = new Object();
         private Object messageLock = new Object();
+        private LogBuilder lb = new LogBuilder();
+        //private ClientConnection clientEndPoint1;
+        //private ClientConnection clientEndPoint2;
         
         /// <summary>
         /// Non-Default constructor, takes 2 endPoints for
@@ -153,7 +156,10 @@ namespace NetworksLab4Middleware.Classes
             serverState.serverStopWatch.Start();
 
             // Set up the local client connection
+            //clientEndPoint1 = new ClientConnection();
+            //clientEndPoint1.ServerState = serverState;
             serverState.localClient = new ClientConnection();
+            serverState.localClient.EndPoint = endPoint1;
             serverState.localClient.ServerState = serverState;
             serverState.localClient.testDataTextbox = testDataTextbox;
 
@@ -243,8 +249,14 @@ namespace NetworksLab4Middleware.Classes
         }
 
         private void ProcessMessage(ServerStateSaver serverState)
-        { 
-        
+        {
+            // save message to log builder dictionary
+            lb.hostReqMessage.Add(serverState.messageCount, serverState.serverMessage);
+
+            // create instance of the ResponseBuilder
+            ResponseBuilder rb = new ResponseBuilder(serverState);
+            rb.HostResponse();
+
         }
     }
 }

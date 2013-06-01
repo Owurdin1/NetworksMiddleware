@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Diagnostics;
@@ -13,13 +14,8 @@ namespace NetworksLab4Middleware.Classes
     {
         public Socket clientSocket = null;
         public Thread clientThread = null;
-        public List<byte[]> clientMessages = null;
-        public Stopwatch clientStopWatch = null;
-        
-        public ClientStateSaver()
-        {
-            clientStopWatch = new Stopwatch();
-        }
+        public List<string> clientMessages = new List<string>();
+        public Stopwatch clientStopWatch = new Stopwatch();
     }
 
     class ServerStateSaver
@@ -27,13 +23,12 @@ namespace NetworksLab4Middleware.Classes
         public Socket serverSocket = null;
         public Thread serverThread = null;
         public byte[] serverMessage = null;
-        public Stopwatch serverStopWatch = null;
+        public byte[] sendMsg = null;
+        public byte[] returnMsg = null;
+        public List<string> messageList = new List<string>();
+        public Stopwatch serverStopWatch = new Stopwatch();
         public int messageCount = 0;
         public ClientConnection localClient = new ClientConnection();
-
-        public ServerStateSaver()
-        {
-            serverStopWatch = new Stopwatch();
-        }
+        public IPAddress serverEndPointIP;
     }
 }
