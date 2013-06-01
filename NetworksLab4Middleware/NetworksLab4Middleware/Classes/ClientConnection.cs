@@ -67,19 +67,14 @@ namespace NetworksLab4Middleware.Classes
         {
             ClientStateSaver clientState = new ClientStateSaver();
             clientState.clientSocket = ConnectSock();
-            clientState.clientStopWatch.Start();
+            serverState.clientState = clientState;
 
-            // Set up thread and begin handling connection
-            // Don't want to start thread to handle connection until
-            // after recieving data from the server. Adding a new 
-            // function that creates a thread and allows the server to
-            // keep doing it's business will be required to make this work.
-            //clientState.clientThread = new Thread(delegate()
-            //    {
-            //        ConnectionHandler(clientState);
-            //    });
+            Thread receiveThread = new Thread(delegate()
+                {
+                    ReceiveHandler(serverState);
+                });
 
-            //clientState.clientThread.Start();
+            receiveThread.Start();
         }
 
         /// <summary>
@@ -105,15 +100,45 @@ namespace NetworksLab4Middleware.Classes
             return sock;
         }
 
+        // begins sending message on to the endPoint
+        public void BeginTransmission()
+        {
+            // Create necessary threads to handle client connection
+            serverState.clientState.clientThread = new Thread(delegate()
+                {
+                    ThraedSendFunction(serverState);
+                });
+
+            // Start threads listening and sending
+            serverState.clientState.clientThread.Start();
+
+            //receiveThread.Join();
+            //serverState.clientState.clientThread.Join();
+        }
+
         /// <summary>
         /// Handles the connection to the endpoint server
         /// </summary>
         /// <param name="clientState">
         /// CleintStateSaver object.
         /// </param>
-        private void ConnectionHandler(ClientStateSaver clientState)
+        private void ThraedSendFunction(ServerStateSaver serverState)
         {
             // TODO: Build the connection handling logic
+            // Be sure to use the client thread/states inside serverState
+        }
+
+        /// <summary>
+        /// Receiving side connection handler
+        /// </summary>
+        /// <param name="clientState">
+        /// takes the ClientStateSaver being used by the hostconnection
+        /// server to keep the messages compiled in the same location
+        /// </param>
+        private void ReceiveHandler(ServerStateSaver serverState)
+        {
+            // TODO: Build receiving logic
+            // Be sure to use the client thread/states inside serverState
         }
     }
 }

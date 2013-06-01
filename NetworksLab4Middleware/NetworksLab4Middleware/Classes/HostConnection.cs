@@ -31,6 +31,7 @@ namespace NetworksLab4Middleware.Classes
         private int pace = 0;
         private Object receiveLock = new Object();
         private Object messageLock = new Object();
+        private Object serverMessageDictAdd = new Object();
         private LogBuilder lb = new LogBuilder();
         //private ClientConnection clientEndPoint1;
         //private ClientConnection clientEndPoint2;
@@ -139,6 +140,7 @@ namespace NetworksLab4Middleware.Classes
         private void AcceptConnections()
         {
             Socket socket = null;
+            int clientCount = 0;
 
             // Accept connection from client
             try
@@ -152,6 +154,7 @@ namespace NetworksLab4Middleware.Classes
 
             // Set up the server state saver
             ServerStateSaver serverState = new ServerStateSaver();
+            serverState.localServerIP = localServerIP;
             serverState.serverSocket = socket;
             serverState.serverStopWatch.Start();
 
@@ -159,9 +162,22 @@ namespace NetworksLab4Middleware.Classes
             //clientEndPoint1 = new ClientConnection();
             //clientEndPoint1.ServerState = serverState;
             serverState.localClient = new ClientConnection();
-            serverState.localClient.EndPoint = endPoint1;
+
+            // if second client
+            if (bonus && clientCount == 1)
+            {
+                serverState.localClient.EndPoint = endPoint2;
+            }
+            else
+            {
+                serverState.localClient.EndPoint = endPoint1;
+                testDataTextbox.Text += "\r\nEndPoint set, start next client";
+            }
+
+
             serverState.localClient.ServerState = serverState;
             serverState.localClient.testDataTextbox = testDataTextbox;
+
 
             // Connect to the endpoint server
             serverState.localClient.Start();
@@ -173,6 +189,8 @@ namespace NetworksLab4Middleware.Classes
                 });
 
             serverState.serverThread.Start();
+
+            clientCount++;
         }
 
         /// <summary>
@@ -196,7 +214,8 @@ namespace NetworksLab4Middleware.Classes
             // message counter
             int messageCount = 0;
 
-            while (true)
+            //while (true)
+            while (serverState.clientState.clientSocket.Connected)
             {
                 // message array pointers
                 int offSet = 0;
@@ -246,17 +265,33 @@ namespace NetworksLab4Middleware.Classes
                 // increment the message counter
                 messageCount++;
             }
+
+            serverState.serverSocket.Shutdown(SocketShutdown.Both);
+            testDataTextbox.Text += 
+                "\r\nClient has shut down it's socket, " +
+                "killing server connection as well.";
         }
 
+        /// <summary>
+        /// processes caught message. starts the client running
+        /// to send the processed message onto the endpoint server.
+        /// </summary>
+        /// <param name="serverState">
+        /// ServerStateSaver object
+        /// </param>
         private void ProcessMessage(ServerStateSaver serverState)
         {
             // save message to log builder dictionary
-            lb.hostReqMessage.Add(serverState.messageCount, serverState.serverMessage);
+            lock (serverMessageDictAdd)
+            {
+                lb.clientReqMessage.Add(serverState.messageCount, serverState.serverMessage);
+            }
 
             // create instance of the ResponseBuilder
             ResponseBuilder rb = new ResponseBuilder(serverState);
             rb.HostResponse();
 
+            serverState.localClient.BeginTransmission();
         }
     }
 }

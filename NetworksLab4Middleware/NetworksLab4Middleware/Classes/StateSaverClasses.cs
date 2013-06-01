@@ -20,15 +20,16 @@ namespace NetworksLab4Middleware.Classes
 
     class ServerStateSaver
     {
-        public Socket serverSocket = null;
-        public Thread serverThread = null;
-        public byte[] serverMessage = null;
-        public byte[] sendMsg = null;
-        public byte[] returnMsg = null;
-        public List<string> messageList = new List<string>();
+        public Socket serverSocket = null;      /* socket attatched to this object */
+        public Thread serverThread = null;      /* Thread attatched to this object */
+        public byte[] serverMessage = null;     /* message from client */
+        public byte[] sendMsg = null;           /* message send to endpoint server */
+        public byte[] returnMsg = null;         /* message to be passed back to client */
         public Stopwatch serverStopWatch = new Stopwatch();
-        public int messageCount = 0;
-        public ClientConnection localClient = new ClientConnection();
-        public IPAddress serverEndPointIP;
+        public int messageCount = 0;            /* counter for the number of messages */
+        public ClientConnection localClient = new ClientConnection();   /* clientconnection object */
+        public IPAddress serverEndPointIP = null;   /* endpoint for server messages to be sent to */
+        public IPAddress localServerIP = null;  /* local server ip address */
+        public ClientStateSaver clientState;
     }
 }

@@ -12,9 +12,9 @@ namespace NetworksLab4Middleware.Classes
         
 
         // public global variables
-        public Dictionary<int, byte[]> hostReqMessage = new Dictionary<int, byte[]>();
-        public Dictionary<int, byte[]> hostResponseMessage = new Dictionary<int, byte[]>();
         public Dictionary<int, byte[]> clientReqMessage = new Dictionary<int, byte[]>();
+        public Dictionary<int, byte[]> hostResponseMessage = new Dictionary<int, byte[]>();
+        //public Dictionary<int, byte[]> clientReqMessage = new Dictionary<int, byte[]>();
         public Dictionary<int, byte[]> clientResponseMessage = new Dictionary<int, byte[]>();
     }
 }
