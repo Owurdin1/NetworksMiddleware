@@ -29,8 +29,9 @@ namespace NetworksLab4Middleware.Classes
         private bool bonus = false;
         private int msgCount = 0;
         private int pace = 0;
-
-
+        private Object receiveLock = new Object();
+        private Object messageLock = new Object();
+        
         /// <summary>
         /// Non-Default constructor, takes 2 endPoints for
         /// the bonus portion of assignment
@@ -50,7 +51,9 @@ namespace NetworksLab4Middleware.Classes
         /// <param name="testDataTextbox">
         /// local output box to print debug/error messages
         /// </param>
-        public HostConnection(int wirelessNicIndex, string endPoint1, int msgCount, int pace, System.Windows.Forms.RichTextBox testDataTextbox)
+        public HostConnection(int wirelessNicIndex, string endPoint1, 
+            int msgCount, int pace, 
+            System.Windows.Forms.RichTextBox testDataTextbox)
         {
             this.wirelessNicIndex = wirelessNicIndex;
             this.endPoint1 = IPAddress.Parse(endPoint1);
@@ -81,7 +84,9 @@ namespace NetworksLab4Middleware.Classes
         /// <param name="testDataTextbox">
         /// local output box to print debug/error messages
         /// </param>
-        public HostConnection(int wirelessNicIndex, string endPoint1, string endPoint2, int msgCount, int pace, System.Windows.Forms.RichTextBox testDataTextbox)
+        public HostConnection(int wirelessNicIndex, string endPoint1, 
+            string endPoint2, int msgCount, int pace, 
+            System.Windows.Forms.RichTextBox testDataTextbox)
         {
             this.wirelessNicIndex = wirelessNicIndex;
             this.endPoint1 = IPAddress.Parse(endPoint1);
@@ -112,13 +117,17 @@ namespace NetworksLab4Middleware.Classes
         {
             // Get local information
             IPHostEntry localIP = Dns.GetHostEntry(Dns.GetHostName());
-            IPEndPoint localEndPoint = new IPEndPoint(localIP.AddressList[wirelessNicIndex], PORT);
+            IPEndPoint localEndPoint = new IPEndPoint(
+                localIP.AddressList[wirelessNicIndex], PORT);
             localServerIP = IPAddress.Parse(localEndPoint.ToString().Split(':')[0]);
 
             // Set up host socket
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, 
+                ProtocolType.Tcp);
             sock.Bind(localEndPoint);
             sock.Listen((int)SocketOptionName.MaxConnections);
+
+            testDataTextbox.Text += localServerIP.ToString() + "\r\n";
         }
 
         /// <summary>
@@ -169,7 +178,73 @@ namespace NetworksLab4Middleware.Classes
         /// </param>
         private void ConnectionHandler(ServerStateSaver serverState)
         {
+            // initialize buffer array
+            byte[] buffer = new byte[BUFFER_SIZE];
 
+            // message length buffer array
+            byte[] byteSize = new byte[LENGTH_BITS];
+
+            // bytes received last read
+            int bytesRead = 0;
+
+            // message counter
+            int messageCount = 0;
+
+            while (true)
+            {
+                // message array pointers
+                int offSet = 0;
+                int size = 0;
+
+                lock (receiveLock)
+                {
+                    bytesRead = serverState.serverSocket.Receive(buffer, 
+                        offSet, LENGTH_BITS, SocketFlags.None);
+                }
+                
+                // Get the size values out of current message
+                Array.Copy(buffer, offSet, byteSize, 0, LENGTH_BITS);
+
+                // Reverse the bits if they aren't in proper order for proc
+                if (BitConverter.IsLittleEndian)
+                {
+                    Array.Reverse(byteSize);
+                }
+
+                // Set the size variable
+                size = BitConverter.ToInt16(byteSize, 0);
+
+                // Set offSet variable
+                offSet += LENGTH_BITS;
+
+                lock (messageLock)
+                {
+                    // read next message out of buffer
+                    bytesRead = serverState.serverSocket.Receive(buffer, offSet, size, 
+                        SocketFlags.None);
+                }
+
+                // Set messageBuffer to correct size
+                serverState.serverMessage = new byte[size];
+
+                // Copy message into the messageBuffer
+                Array.Copy(buffer, offSet, serverState.serverMessage, 0, size);
+
+                // Send the message off to be processed
+                Thread processMessageThread = new Thread(delegate()
+                    {
+                        ProcessMessage(serverState);
+                    });
+                serverState.serverThread.Start();
+
+                // increment the message counter
+                messageCount++;
+            }
+        }
+
+        private void ProcessMessage(ServerStateSaver serverState)
+        { 
+        
         }
     }
 }

@@ -79,7 +79,7 @@
             this.deviceListTextbox.Location = new System.Drawing.Point(13, 131);
             this.deviceListTextbox.Name = "deviceListTextbox";
             this.deviceListTextbox.Size = new System.Drawing.Size(250, 91);
-            this.deviceListTextbox.TabIndex = 7;
+            this.deviceListTextbox.TabIndex = 9;
             this.deviceListTextbox.Text = "";
             // 
             // deviceDropDownLabel
@@ -125,7 +125,7 @@
             this.testDataTextbox.Location = new System.Drawing.Point(13, 241);
             this.testDataTextbox.Name = "testDataTextbox";
             this.testDataTextbox.Size = new System.Drawing.Size(250, 120);
-            this.testDataTextbox.TabIndex = 8;
+            this.testDataTextbox.TabIndex = 10;
             this.testDataTextbox.Text = "";
             // 
             // startButton
@@ -133,7 +133,7 @@
             this.startButton.Location = new System.Drawing.Point(107, 1);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(75, 23);
-            this.startButton.TabIndex = 5;
+            this.startButton.TabIndex = 7;
             this.startButton.Text = "Start";
             this.startButton.UseVisualStyleBackColor = true;
             this.startButton.Click += new System.EventHandler(this.startButton_Click);
@@ -143,7 +143,7 @@
             this.finishButton.Location = new System.Drawing.Point(188, 1);
             this.finishButton.Name = "finishButton";
             this.finishButton.Size = new System.Drawing.Size(75, 23);
-            this.finishButton.TabIndex = 6;
+            this.finishButton.TabIndex = 8;
             this.finishButton.Text = "Finish";
             this.finishButton.UseVisualStyleBackColor = true;
             this.finishButton.Click += new System.EventHandler(this.finishButton_Click);
@@ -195,7 +195,7 @@
             this.paceTextbox.Location = new System.Drawing.Point(270, 53);
             this.paceTextbox.Name = "paceTextbox";
             this.paceTextbox.Size = new System.Drawing.Size(81, 20);
-            this.paceTextbox.TabIndex = 14;
+            this.paceTextbox.TabIndex = 5;
             // 
             // paceLabel
             // 
@@ -220,7 +220,7 @@
             this.msgCountTextbox.Location = new System.Drawing.Point(270, 92);
             this.msgCountTextbox.Name = "msgCountTextbox";
             this.msgCountTextbox.Size = new System.Drawing.Size(81, 20);
-            this.msgCountTextbox.TabIndex = 17;
+            this.msgCountTextbox.TabIndex = 6;
             // 
             // Form1
             // 

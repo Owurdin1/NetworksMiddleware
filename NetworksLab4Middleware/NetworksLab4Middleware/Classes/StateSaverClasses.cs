@@ -26,8 +26,9 @@ namespace NetworksLab4Middleware.Classes
     {
         public Socket serverSocket = null;
         public Thread serverThread = null;
-        public List<byte[]> serverMessages = null;
+        public byte[] serverMessage = null;
         public Stopwatch serverStopWatch = null;
+        public int messageCount = 0;
         public ClientConnection localClient = new ClientConnection();
 
         public ServerStateSaver()
