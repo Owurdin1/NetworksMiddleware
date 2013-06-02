@@ -28,16 +28,18 @@ namespace NetworksLab4Middleware.Classes
         public void WriteLogs(ServerStateSaver serverState)
         {
             StreamWriter sw = File.AppendText(PATH);
+            
+            string previousMsg = string.Empty;
 
             foreach (byte[] item in messageLogList)
             {
-                // Remove the size bits from message
-                //byte[] noSize = new byte[item.Length - LENGTH_BITS];
-                //Array.Copy(item, LENGTH_BITS, noSize, 0, noSize.Length);
-
-                //string msg = System.Text.Encoding.ASCII.GetString(noSize) + "\n\r";
                 string msg = System.Text.Encoding.ASCII.GetString(item) + "\n\r";
-                sw.Write(msg);
+
+                if (!previousMsg.Contains(msg))
+                {
+                    sw.Write(msg);
+                    previousMsg += msg;
+                }
             }
 
             sw.Close();

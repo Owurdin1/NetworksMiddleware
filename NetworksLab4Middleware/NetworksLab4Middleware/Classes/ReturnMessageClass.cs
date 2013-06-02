@@ -25,15 +25,9 @@ namespace NetworksLab4Middleware.Classes
                 serverState.lb.messageLogList.Add(serverState.returnMsg);
             }
 
-            try
+            lock (sendLock)
             {
-                lock (sendLock)
-                {
-                    serverState.serverSocket.Send(serverState.returnMsg);
-                }
-            }
-            catch (Exception)
-            {
+                serverState.serverSocket.Send(serverState.returnMsg);
             }
         }
     }

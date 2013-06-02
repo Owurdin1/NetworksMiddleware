@@ -268,6 +268,8 @@ namespace NetworksLab4Middleware.Classes
             {
             }
 
+            serverState.serverThread.Join();
+            serverState.clientState.clientThread.Join();
             serverState.lb.WriteLogs(serverState);
             serverState.serverSocket.Shutdown(SocketShutdown.Both);
             

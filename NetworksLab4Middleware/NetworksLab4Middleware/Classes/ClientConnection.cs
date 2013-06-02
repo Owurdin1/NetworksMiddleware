@@ -98,8 +98,14 @@ namespace NetworksLab4Middleware.Classes
                     ThreadSendFunction(serverState);
                 });
 
-            // Start threads listening and sending
-            serverState.clientState.clientThread.Start();
+            try
+            {
+                // Start threads listening and sending
+                serverState.clientState.clientThread.Start();
+            }
+            catch (Exception)
+            {
+            }
 
             //receiveThread.Join();
             //serverState.clientState.clientThread.Join();
@@ -114,19 +120,25 @@ namespace NetworksLab4Middleware.Classes
         /// </param>
         private void ThreadSendFunction(ServerStateSaver serverState)
         {
-            // sleep the thread based on pace given in gui
-            Thread.Sleep(serverState.clientState.pace);
-
-            // lock socket and send the message to endpoint server
-            lock (clientSendLock)
+            try
             {
-                serverState.clientState.clientSocket.Send(serverState.sendMsg);
+                // sleep the thread based on pace given in gui
+                Thread.Sleep(serverState.clientState.pace);
+
+                // lock socket and send the message to endpoint server
+                lock (clientSendLock)
+                {
+                    serverState.clientState.clientSocket.Send(serverState.sendMsg);
+                }
+
+                // put the message into the log builder
+                lock (serverState.serverMessageAdd)
+                {
+                    serverState.lb.messageLogList.Add(serverState.sendMsg);
+                }
             }
-
-            // put the message into the log builder
-            lock (serverState.serverMessageAdd)
+            catch (Exception)
             {
-                serverState.lb.messageLogList.Add(serverState.sendMsg);
             }
         }
 
