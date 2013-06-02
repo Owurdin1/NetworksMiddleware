@@ -44,7 +44,9 @@ namespace NetworksLab4Middleware.Classes
             set { serverState = value; }
         }
 
-
+        /// <summary>
+        /// gets or sets the endPoint to connect to
+        /// </summary>
         public IPAddress EndPoint
         {
             get { return endPoint; }
@@ -126,8 +128,10 @@ namespace NetworksLab4Middleware.Classes
             }
 
             // put the message into the log builder
-            serverState.lb.hostForwardMessage.Add
-                (serverState.clientState.clientMsgCount, serverState.sendMsg);
+            lock (serverState.serverMessageAdd)
+            {
+                serverState.lb.messageLogList.Add(serverState.sendMsg);
+            }
         }
 
         /// <summary>

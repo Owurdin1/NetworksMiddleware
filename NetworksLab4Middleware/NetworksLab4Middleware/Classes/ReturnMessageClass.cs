@@ -19,8 +19,11 @@ namespace NetworksLab4Middleware.Classes
         /// </param>
         public void ReturnMessage(ServerStateSaver serverState)
         {
-            serverState.lb.clientResponseMessage.Add
-                (serverState.clientState.clientMsgCount, serverState.returnMsg);
+            // Add message to the log
+            lock (serverState.serverMessageAdd)
+            {
+                serverState.lb.messageLogList.Add(serverState.returnMsg);
+            }
 
             lock (sendLock)
             {

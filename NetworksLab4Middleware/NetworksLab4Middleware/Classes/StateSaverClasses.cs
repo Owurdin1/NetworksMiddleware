@@ -34,8 +34,8 @@ namespace NetworksLab4Middleware.Classes
         public IPAddress localServerIP = null;                          /* local server ip address */
         public ClientStateSaver clientState;
         public LogBuilder lb = new LogBuilder();
+        public Object serverMessageAdd = new Object();
         public Object sendLock = new Object();
-        public Object serverMessageDictAdd = new Object();
         public Object messageLock = new Object();
         public Object receiveLock = new Object();
     }

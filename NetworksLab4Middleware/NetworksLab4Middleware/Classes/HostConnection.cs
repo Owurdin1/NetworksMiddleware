@@ -29,8 +29,8 @@ namespace NetworksLab4Middleware.Classes
         private bool bonus = false;
         private int msgCount = 0;
         private int pace = 0;
-        private Object receiveLock = new Object();
-        private Object messageLock = new Object();
+        //private Object receiveLock = new Object();
+        //private Object messageLock = new Object();
         
         /// <summary>
         /// Non-Default constructor, takes 2 endPoints for
@@ -135,59 +135,62 @@ namespace NetworksLab4Middleware.Classes
         /// </summary>
         private void AcceptConnections()
         {
-            Socket socket = null;
-            int clientCount = 0;
-
-            // Accept connection from client
-            try
+            while (true)
             {
-                socket = sock.Accept();
-            }
-            catch (Exception e)
-            {
-                testDataTextbox.Text += "ERROR! " + e.Message;
-            }
+                Socket socket = null;
+                int clientCount = 0;
 
-            // Set up the server state saver
-            ServerStateSaver serverState = new ServerStateSaver();
-            serverState.localServerIP = localServerIP;
-            serverState.serverSocket = socket;
-            serverState.serverStopWatch.Start();
-
-            // Set up the local client connection
-            //clientEndPoint1 = new ClientConnection();
-            //clientEndPoint1.ServerState = serverState;
-            serverState.localClient = new ClientConnection();
-
-            // if second client
-            if (bonus && clientCount == 1)
-            {
-                serverState.localClient.EndPoint = endPoint2;
-            }
-            else
-            {
-                serverState.localClient.EndPoint = endPoint1;
-                testDataTextbox.Text += "\r\nEndPoint set, start next client";
-            }
-
-            // set up the client for endpoint comm
-            serverState.localClient.ServerState = serverState;
-            serverState.localClient.testDataTextbox = testDataTextbox;
-            serverState.clientState.pace = pace;
-
-
-            // Connect to the endpoint server
-            serverState.localClient.Start();
-
-            // Set up and start thread on connection handler function
-            serverState.serverThread = new Thread(delegate()
+                // Accept connection from client
+                try
                 {
-                    ConnectionHandler(serverState);
-                });
+                    socket = sock.Accept();
+                }
+                catch (Exception e)
+                {
+                    testDataTextbox.Text += "ERROR! " + e.Message;
+                }
 
-            serverState.serverThread.Start();
+                // Set up the server state saver
+                ServerStateSaver serverState = new ServerStateSaver();
+                serverState.localServerIP = localServerIP;
+                serverState.serverSocket = socket;
+                serverState.serverStopWatch.Start();
 
-            clientCount++;
+                // Set up the local client connection
+                //clientEndPoint1 = new ClientConnection();
+                //clientEndPoint1.ServerState = serverState;
+                serverState.localClient = new ClientConnection();
+
+                // if second client
+                if (bonus && clientCount == 1)
+                {
+                    serverState.localClient.EndPoint = endPoint2;
+                }
+                else
+                {
+                    serverState.localClient.EndPoint = endPoint1;
+                    testDataTextbox.Text += "\r\nEndPoint set, start next client";
+                }
+
+                // set up the client for endpoint comm
+                serverState.localClient.ServerState = serverState;
+                serverState.localClient.testDataTextbox = testDataTextbox;
+                serverState.clientState.pace = pace;
+
+
+                // Connect to the endpoint server
+                serverState.localClient.Start();
+
+                // Set up and start thread on connection handler function
+                serverState.serverThread = new Thread(delegate()
+                    {
+                        ConnectionHandler(serverState);
+                    });
+
+                serverState.serverThread.Start();
+
+                clientCount++;
+            }
         }
 
         /// <summary>
@@ -212,13 +215,14 @@ namespace NetworksLab4Middleware.Classes
             int messageCount = 0;
 
             //while (true)
-            while (serverState.clientState.clientSocket.Connected)
+            //while (serverState.clientState.clientSocket.Connected)
+            while (serverState.serverSocket.Connected)
             {
                 // message array pointers
                 int offSet = 0;
                 int size = 0;
 
-                lock (receiveLock)
+                lock (serverState.receiveLock)
                 {
                     bytesRead = serverState.serverSocket.Receive(buffer, 
                         offSet, LENGTH_BITS, SocketFlags.None);
@@ -263,10 +267,13 @@ namespace NetworksLab4Middleware.Classes
                 messageCount++;
             }
 
+            serverState.lb.WriteLogs(serverState);
             serverState.serverSocket.Shutdown(SocketShutdown.Both);
+            
             testDataTextbox.Text += 
                 "\r\nClient has shut down it's socket, " +
-                "killing server connection as well.";
+                "killing server connection as well." +
+                "Writing Logs";
         }
 
         /// <summary>
@@ -279,8 +286,10 @@ namespace NetworksLab4Middleware.Classes
         private void ProcessMessage(ServerStateSaver serverState)
         {
             // save message to log builder dictionary
-            serverState.lb.clientReqMessage.Add
-                (serverState.messageCount, serverState.serverMessage);
+            lock (serverState.serverMessageAdd)
+            {
+                serverState.lb.messageLogList.Add(serverState.serverMessage);
+            }
 
             // create instance of the ResponseBuilder
             ResponseBuilder rb = new ResponseBuilder(serverState);
