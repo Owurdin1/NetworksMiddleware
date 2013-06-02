@@ -14,22 +14,29 @@ namespace NetworksLab4Middleware.Classes
     {
         public Socket clientSocket = null;
         public Thread clientThread = null;
-        public List<string> clientMessages = new List<string>();
+        public byte[] clientBuffer = new byte[256];
+        public int clientMsgCount = 0;
+        public int pace = 0;
         public Stopwatch clientStopWatch = new Stopwatch();
     }
 
     class ServerStateSaver
     {
-        public Socket serverSocket = null;      /* socket attatched to this object */
-        public Thread serverThread = null;      /* Thread attatched to this object */
-        public byte[] serverMessage = null;     /* message from client */
-        public byte[] sendMsg = null;           /* message send to endpoint server */
-        public byte[] returnMsg = null;         /* message to be passed back to client */
+        public Socket serverSocket = null;                              /* socket attatched to this object */
+        public Thread serverThread = null;                              /* Thread attatched to this object */
+        public byte[] serverMessage = null;                             /* message from client */
+        public byte[] sendMsg = null;                                   /* message send to endpoint server */
+        public byte[] returnMsg = null;                                 /* message to be passed back to client */
         public Stopwatch serverStopWatch = new Stopwatch();
-        public int messageCount = 0;            /* counter for the number of messages */
+        public int messageCount = 0;                                    /* counter for the number of messages */
         public ClientConnection localClient = new ClientConnection();   /* clientconnection object */
-        public IPAddress serverEndPointIP = null;   /* endpoint for server messages to be sent to */
-        public IPAddress localServerIP = null;  /* local server ip address */
+        public IPAddress serverEndPointIP = null;                       /* endpoint for server messages to be sent to */
+        public IPAddress localServerIP = null;                          /* local server ip address */
         public ClientStateSaver clientState;
+        public LogBuilder lb = new LogBuilder();
+        public Object sendLock = new Object();
+        public Object serverMessageDictAdd = new Object();
+        public Object messageLock = new Object();
+        public Object receiveLock = new Object();
     }
 }

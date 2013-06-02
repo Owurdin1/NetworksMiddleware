@@ -31,10 +31,6 @@ namespace NetworksLab4Middleware.Classes
         private int pace = 0;
         private Object receiveLock = new Object();
         private Object messageLock = new Object();
-        private Object serverMessageDictAdd = new Object();
-        private LogBuilder lb = new LogBuilder();
-        //private ClientConnection clientEndPoint1;
-        //private ClientConnection clientEndPoint2;
         
         /// <summary>
         /// Non-Default constructor, takes 2 endPoints for
@@ -174,9 +170,10 @@ namespace NetworksLab4Middleware.Classes
                 testDataTextbox.Text += "\r\nEndPoint set, start next client";
             }
 
-
+            // set up the client for endpoint comm
             serverState.localClient.ServerState = serverState;
             serverState.localClient.testDataTextbox = testDataTextbox;
+            serverState.clientState.pace = pace;
 
 
             // Connect to the endpoint server
@@ -242,7 +239,7 @@ namespace NetworksLab4Middleware.Classes
                 // Set offSet variable
                 offSet += LENGTH_BITS;
 
-                lock (messageLock)
+                lock (serverState.messageLock)
                 {
                     // read next message out of buffer
                     bytesRead = serverState.serverSocket.Receive(buffer, offSet, size, 
@@ -282,10 +279,8 @@ namespace NetworksLab4Middleware.Classes
         private void ProcessMessage(ServerStateSaver serverState)
         {
             // save message to log builder dictionary
-            lock (serverMessageDictAdd)
-            {
-                lb.clientReqMessage.Add(serverState.messageCount, serverState.serverMessage);
-            }
+            serverState.lb.clientReqMessage.Add
+                (serverState.messageCount, serverState.serverMessage);
 
             // create instance of the ResponseBuilder
             ResponseBuilder rb = new ResponseBuilder(serverState);

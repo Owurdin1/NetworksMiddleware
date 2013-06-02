@@ -17,24 +17,15 @@ namespace NetworksLab4Middleware.Classes
         // global private variables
         private IPAddress endPoint;
         private Socket sock;
-        private int pace = 0;
         private int msgCount = 0;
         private ServerStateSaver serverState = new ServerStateSaver();
         private List<byte[]> sendMessages = new List<byte[]>();
         private List<byte[]> recMessages = new List<byte[]>();
+        private Object clientSendLock = new Object();
 
         // global public variables
         public System.Windows.Forms.RichTextBox testDataTextbox;
-
-        /// <summary>
-        /// sets or gets the pace of the client
-        /// </summary>
-        public int Pace
-        {
-            get { return pace; }
-            set { pace = value; }
-        }
-
+        
         /// <summary>
         /// sets or gets the message count
         /// </summary>
@@ -106,7 +97,7 @@ namespace NetworksLab4Middleware.Classes
             // Create necessary threads to handle client connection
             serverState.clientState.clientThread = new Thread(delegate()
                 {
-                    ThraedSendFunction(serverState);
+                    ThreadSendFunction(serverState);
                 });
 
             // Start threads listening and sending
@@ -118,14 +109,25 @@ namespace NetworksLab4Middleware.Classes
 
         /// <summary>
         /// Handles the connection to the endpoint server
+        /// sends messages from middlware to endpoint.
         /// </summary>
         /// <param name="clientState">
         /// CleintStateSaver object.
         /// </param>
-        private void ThraedSendFunction(ServerStateSaver serverState)
+        private void ThreadSendFunction(ServerStateSaver serverState)
         {
-            // TODO: Build the connection handling logic
-            // Be sure to use the client thread/states inside serverState
+            // sleep the thread based on pace given in gui
+            Thread.Sleep(serverState.clientState.pace);
+
+            // lock socket and send the message to endpoint server
+            lock (clientSendLock)
+            {
+                serverState.clientState.clientSocket.Send(serverState.sendMsg);
+            }
+
+            // put the message into the log builder
+            serverState.lb.hostForwardMessage.Add
+                (serverState.clientState.clientMsgCount, serverState.sendMsg);
         }
 
         /// <summary>
@@ -137,8 +139,38 @@ namespace NetworksLab4Middleware.Classes
         /// </param>
         private void ReceiveHandler(ServerStateSaver serverState)
         {
-            // TODO: Build receiving logic
-            // Be sure to use the client thread/states inside serverState
+            int receivedBytes = 0;
+
+            try
+            {
+                do
+                {
+                    receivedBytes = 
+                        serverState.clientState.clientSocket.Receive
+                        (serverState.clientState.clientBuffer);
+
+                    serverState.returnMsg = new byte[receivedBytes];
+
+                    Array.Copy(serverState.clientState.clientBuffer, 
+                        serverState.returnMsg, receivedBytes);
+
+                    serverState.clientState.clientMsgCount++;
+
+                    ReturnMessageClass rmc = new ReturnMessageClass();
+
+                    Thread returnThread = new Thread(delegate()
+                        {
+                            rmc.ReturnMessage(serverState);
+                        });
+
+                    returnThread.Start();
+                }
+                while (receivedBytes > 0);
+            }
+            catch (Exception)
+            { 
+
+            }
         }
     }
 }
