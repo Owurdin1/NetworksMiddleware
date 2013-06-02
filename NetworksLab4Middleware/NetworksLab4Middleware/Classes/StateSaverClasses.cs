@@ -29,7 +29,7 @@ namespace NetworksLab4Middleware.Classes
         public byte[] returnMsg = null;                                 /* message to be passed back to client */
         public Stopwatch serverStopWatch = new Stopwatch();
         public int messageCount = 0;                                    /* counter for the number of messages */
-        public ClientConnection localClient = new ClientConnection();   /* clientconnection object */
+        public ClientConnection localClient;                            /* clientconnection object */
         public IPAddress serverEndPointIP = null;                       /* endpoint for server messages to be sent to */
         public IPAddress localServerIP = null;                          /* local server ip address */
         public ClientStateSaver clientState;

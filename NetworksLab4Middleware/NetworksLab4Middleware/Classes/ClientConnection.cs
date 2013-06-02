@@ -18,13 +18,13 @@ namespace NetworksLab4Middleware.Classes
         private IPAddress endPoint;
         private Socket sock;
         private int msgCount = 0;
-        private ServerStateSaver serverState = new ServerStateSaver();
+        private ServerStateSaver serverState;
         private List<byte[]> sendMessages = new List<byte[]>();
         private List<byte[]> recMessages = new List<byte[]>();
         private Object clientSendLock = new Object();
 
         // global public variables
-        public System.Windows.Forms.RichTextBox testDataTextbox;
+        //public System.Windows.Forms.RichTextBox testDataTextbox;
         
         /// <summary>
         /// sets or gets the message count
@@ -36,21 +36,17 @@ namespace NetworksLab4Middleware.Classes
         }
 
         /// <summary>
-        /// gets or sets the server state saver object
-        /// </summary>
-        public ServerStateSaver ServerState
-        {
-            get { return serverState; }
-            set { serverState = value; }
-        }
-
-        /// <summary>
         /// gets or sets the endPoint to connect to
         /// </summary>
         public IPAddress EndPoint
         {
             get { return endPoint; }
             set { endPoint = value; }
+        }
+
+        public ClientConnection(ServerStateSaver serverState)
+        {
+            this.serverState = serverState;
         }
 
         /// <summary>
@@ -85,9 +81,9 @@ namespace NetworksLab4Middleware.Classes
                 sock.Connect(endPoint, PORT);
                 sock.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                testDataTextbox.Text += e.Message;
+                //testDataTextbox.Text += e.Message;
             }
 
             return sock;

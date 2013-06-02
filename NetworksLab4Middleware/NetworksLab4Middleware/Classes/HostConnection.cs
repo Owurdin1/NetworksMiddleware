@@ -21,7 +21,7 @@ namespace NetworksLab4Middleware.Classes
         // Private class variables
         private Socket sock = null;
         private int wirelessNicIndex = 0;
-        private System.Windows.Forms.RichTextBox testDataTextbox;
+        //private System.Windows.Forms.RichTextBox testDataTextbox;
         private Thread acceptThread = null;
         private IPAddress localServerIP;
         private IPAddress endPoint1;
@@ -48,18 +48,14 @@ namespace NetworksLab4Middleware.Classes
         /// <param name="pace">
         /// pause for the client pace
         /// </param>
-        /// <param name="testDataTextbox">
-        /// local output box to print debug/error messages
-        /// </param>
         public HostConnection(int wirelessNicIndex, string endPoint1, 
-            int msgCount, int pace, 
-            System.Windows.Forms.RichTextBox testDataTextbox)
+            int msgCount, int pace)
         {
             this.wirelessNicIndex = wirelessNicIndex;
             this.endPoint1 = IPAddress.Parse(endPoint1);
             this.msgCount = msgCount;
             this.pace = pace;
-            this.testDataTextbox = testDataTextbox;
+            //this.testDataTextbox = testDataTextbox;
         }
 
         /// <summary>
@@ -81,12 +77,8 @@ namespace NetworksLab4Middleware.Classes
         /// <param name="pace">
         /// pause for the client pace
         /// </param>
-        /// <param name="testDataTextbox">
-        /// local output box to print debug/error messages
-        /// </param>
         public HostConnection(int wirelessNicIndex, string endPoint1, 
-            string endPoint2, int msgCount, int pace, 
-            System.Windows.Forms.RichTextBox testDataTextbox)
+            string endPoint2, int msgCount, int pace)
         {
             this.wirelessNicIndex = wirelessNicIndex;
             this.endPoint1 = IPAddress.Parse(endPoint1);
@@ -94,7 +86,7 @@ namespace NetworksLab4Middleware.Classes
             this.msgCount = msgCount;
             this.pace = pace;
             bonus = true;
-            this.testDataTextbox = testDataTextbox;
+            //this.testDataTextbox = testDataTextbox;
         }
 
         /// <summary>
@@ -127,7 +119,7 @@ namespace NetworksLab4Middleware.Classes
             sock.Bind(localEndPoint);
             sock.Listen((int)SocketOptionName.MaxConnections);
 
-            testDataTextbox.Text += localServerIP.ToString() + "\r\n";
+            //testDataTextbox.Text += localServerIP.ToString() + "\r\n";
         }
 
         /// <summary>
@@ -145,9 +137,9 @@ namespace NetworksLab4Middleware.Classes
                 {
                     socket = sock.Accept();
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    testDataTextbox.Text += "ERROR! " + e.Message;
+                    //testDataTextbox.Text += "ERROR! " + e.Message;
                 }
 
                 // Set up the server state saver
@@ -159,7 +151,7 @@ namespace NetworksLab4Middleware.Classes
                 // Set up the local client connection
                 //clientEndPoint1 = new ClientConnection();
                 //clientEndPoint1.ServerState = serverState;
-                serverState.localClient = new ClientConnection();
+                serverState.localClient = new ClientConnection(serverState);
 
                 // if second client
                 if (bonus && clientCount == 1)
@@ -169,12 +161,14 @@ namespace NetworksLab4Middleware.Classes
                 else
                 {
                     serverState.localClient.EndPoint = endPoint1;
-                    testDataTextbox.Text += "\r\nEndPoint set, start next client";
+                    //testDataTextbox.Text += "\r\nEndPoint set, start next client";
                 }
 
                 // set up the client for endpoint comm
-                serverState.localClient.ServerState = serverState;
-                serverState.localClient.testDataTextbox = testDataTextbox;
+                //serverState.localClient.ServerState = serverState;
+                //serverState.localClient = new ClientConnection(serverState);
+                //serverState.localClient.testDataTextbox = testDataTextbox;
+                serverState.clientState = new ClientStateSaver();
                 serverState.clientState.pace = pace;
 
 
@@ -214,66 +208,73 @@ namespace NetworksLab4Middleware.Classes
             // message counter
             int messageCount = 0;
 
-            //while (true)
-            //while (serverState.clientState.clientSocket.Connected)
-            while (serverState.serverSocket.Connected)
+            try
             {
-                // message array pointers
-                int offSet = 0;
-                int size = 0;
-
-                lock (serverState.receiveLock)
+                //while (true)
+                //while (serverState.clientState.clientSocket.Connected)
+                while (serverState.serverSocket.Connected)
                 {
-                    bytesRead = serverState.serverSocket.Receive(buffer, 
-                        offSet, LENGTH_BITS, SocketFlags.None);
-                }
-                
-                // Get the size values out of current message
-                Array.Copy(buffer, offSet, byteSize, 0, LENGTH_BITS);
+                    // message array pointers
+                    int offSet = 0;
+                    int size = 0;
 
-                // Reverse the bits if they aren't in proper order for proc
-                if (BitConverter.IsLittleEndian)
-                {
-                    Array.Reverse(byteSize);
-                }
-
-                // Set the size variable
-                size = BitConverter.ToInt16(byteSize, 0);
-
-                // Set offSet variable
-                offSet += LENGTH_BITS;
-
-                lock (serverState.messageLock)
-                {
-                    // read next message out of buffer
-                    bytesRead = serverState.serverSocket.Receive(buffer, offSet, size, 
-                        SocketFlags.None);
-                }
-
-                // Set messageBuffer to correct size
-                serverState.serverMessage = new byte[size];
-
-                // Copy message into the messageBuffer
-                Array.Copy(buffer, offSet, serverState.serverMessage, 0, size);
-
-                // Send the message off to be processed
-                Thread processMessageThread = new Thread(delegate()
+                    lock (serverState.receiveLock)
                     {
-                        ProcessMessage(serverState);
-                    });
-                serverState.serverThread.Start();
+                        bytesRead = serverState.serverSocket.Receive(buffer,
+                            offSet, LENGTH_BITS, SocketFlags.None);
+                    }
 
-                // increment the message counter
-                messageCount++;
+                    // Get the size values out of current message
+                    Array.Copy(buffer, offSet, byteSize, 0, LENGTH_BITS);
+
+                    // Reverse the bits if they aren't in proper order for proc
+                    if (BitConverter.IsLittleEndian)
+                    {
+                        Array.Reverse(byteSize);
+                    }
+
+                    // Set the size variable
+                    size = BitConverter.ToInt16(byteSize, 0);
+
+                    // Set offSet variable
+                    offSet += LENGTH_BITS;
+
+                    lock (serverState.messageLock)
+                    {
+                        // read next message out of buffer
+                        bytesRead = serverState.serverSocket.Receive(buffer, offSet, size,
+                            SocketFlags.None);
+                    }
+
+                    // Set messageBuffer to correct size
+                    serverState.serverMessage = new byte[size];
+
+                    // Copy message into the messageBuffer
+                    Array.Copy(buffer, offSet, serverState.serverMessage, 0, size);
+
+                    // Send the message off to be processed
+                    //Thread processMessageThread = new Thread(delegate()
+                    serverState.serverThread = new Thread(delegate()
+                        {
+                            ProcessMessage(serverState);
+                        });
+                    serverState.serverThread.Start();
+
+                    // increment the message counter
+                    messageCount++;
+                }
+            }
+            catch (Exception)
+            {
             }
 
             serverState.lb.WriteLogs(serverState);
             serverState.serverSocket.Shutdown(SocketShutdown.Both);
             
-            testDataTextbox.Text += 
-                "\r\nClient has shut down it's socket, " +
-                "killing server connection as well." +
-                "Writing Logs";
+            //testDataTextbox.Text += 
+            //    "\r\nClient has shut down it's socket, " +
+            //    "killing server connection as well." +
+            //    "Writing Logs";
         }
 
         /// <summary>

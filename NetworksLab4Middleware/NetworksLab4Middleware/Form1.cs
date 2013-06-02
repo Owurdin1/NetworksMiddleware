@@ -46,8 +46,7 @@ namespace NetworksLab4Middleware
                     deviceDropDown.SelectedIndex, 
                     server1IPTextbox.Text, 
                     Convert.ToInt32(msgCountTextbox.Text), 
-                    Convert.ToInt32(paceTextbox.Text), 
-                    testDataTextbox);
+                    Convert.ToInt32(paceTextbox.Text));
             }
             else
             {
@@ -56,8 +55,7 @@ namespace NetworksLab4Middleware
                     server1IPTextbox.Text, 
                     server2IPTextbox.Text, 
                     Convert.ToInt32(msgCountTextbox.Text), 
-                    Convert.ToInt32(paceTextbox.Text),
-                    testDataTextbox);
+                    Convert.ToInt32(paceTextbox.Text));
             }
 
             server.Start();
