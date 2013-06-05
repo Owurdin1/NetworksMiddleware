@@ -118,8 +118,6 @@ namespace NetworksLab4Middleware.Classes
                 ProtocolType.Tcp);
             sock.Bind(localEndPoint);
             sock.Listen((int)SocketOptionName.MaxConnections);
-
-            //testDataTextbox.Text += localServerIP.ToString() + "\r\n";
         }
 
         /// <summary>

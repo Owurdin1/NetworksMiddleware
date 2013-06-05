@@ -12,6 +12,7 @@ namespace NetworksLab4Middleware.Classes
     {
         // global constant variables
         private const int PORT = 2605;
+        private const int LENGTH_BITS = 2;
 
 
         // global private variables
@@ -152,18 +153,52 @@ namespace NetworksLab4Middleware.Classes
         private void ReceiveHandler(ServerStateSaver serverState)
         {
             int receivedBytes = 0;
+            byte[] byteSize = new byte[LENGTH_BITS];
+            byte[] clientBuffer = serverState.clientState.clientBuffer;
 
             try
             {
                 do
                 {
-                    receivedBytes = 
+                    //int offset = 0;
+                    //int size = 0;
+
+                    //receivedBytes = serverState.clientState.clientSocket.Receive(clientBuffer,
+                    //    offset, LENGTH_BITS, SocketFlags.None);
+
+                    //Array.Copy(clientBuffer, offset, byteSize, 0, LENGTH_BITS);
+
+                    //if (BitConverter.IsLittleEndian)
+                    //{
+                    //    Array.Reverse(byteSize);
+                    //}
+
+                    //size = BitConverter.ToInt16(byteSize, 0);
+
+                    //offset += LENGTH_BITS;
+
+                    //receivedBytes = serverState.clientState.clientSocket.Receive(clientBuffer,
+                    //    offset, size, SocketFlags.None);
+
+                    //serverState.returnMsg = new byte[size];
+
+                    //Array.Copy(clientBuffer, offset, serverState.returnMsg, 0, size);
+
+                    //ReturnMessageClass rmc = new ReturnMessageClass();
+
+                    //Thread returnThread = new Thread(delegate()
+                    //    {
+                    //        rmc.ReturnMessage(serverState);
+                    //    });
+                    //returnThread.Start();
+
+                    receivedBytes =
                         serverState.clientState.clientSocket.Receive
                         (serverState.clientState.clientBuffer);
 
                     serverState.returnMsg = new byte[receivedBytes];
 
-                    Array.Copy(serverState.clientState.clientBuffer, 
+                    Array.Copy(serverState.clientState.clientBuffer,
                         serverState.returnMsg, receivedBytes);
 
                     serverState.clientState.clientMsgCount++;

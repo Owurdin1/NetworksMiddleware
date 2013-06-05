@@ -48,7 +48,7 @@ namespace NetworksLab4Middleware.Classes
             msgArray[FORIEGN_HOST_IP] = serverState.serverSocket.RemoteEndPoint.AddressFamily.ToString();
             msgArray[PORT_INDEX] = "2605";
             msgArray[SERVER_IP_ADDRESS] = serverState.localServerIP.ToString();
-            msgArray[CUSTOM_FIELD] = "OW " + serverState.messageCount.ToString();
+            msgArray[CUSTOM_FIELD] = "OWMidForm " + serverState.messageCount.ToString();
 
             string message = string.Join("|", msgArray);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
+//using System.IO;
 
 namespace NetworksLab4Middleware.Classes
 {
@@ -27,18 +27,23 @@ namespace NetworksLab4Middleware.Classes
         /// <param name="serverState"></param>
         public void WriteLogs(ServerStateSaver serverState)
         {
-            StreamWriter sw = File.AppendText(PATH);
+            //StreamWriter sw = File.AppendText(PATH);
+            System.IO.StreamWriter sw = System.IO.File.AppendText(PATH);
             
             string previousMsg = string.Empty;
 
-            foreach (byte[] item in messageLogList)
+            lock (serverState.serverMessageAdd)
             {
-                string msg = System.Text.Encoding.ASCII.GetString(item) + "\n\r";
-
-                if (!previousMsg.Contains(msg))
+                foreach (byte[] item in messageLogList)
                 {
-                    sw.Write(msg);
-                    previousMsg += msg;
+                    //string msg = System.Text.Encoding.ASCII.GetString(item);
+                    string msg = System.Text.Encoding.ASCII.GetString(item) + "\r\n";
+
+                    if (!previousMsg.Contains(msg))
+                    {
+                        sw.Write(msg);
+                        previousMsg += msg;
+                    }
                 }
             }
 

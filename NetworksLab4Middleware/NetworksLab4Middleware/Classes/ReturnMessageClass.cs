@@ -19,15 +19,22 @@ namespace NetworksLab4Middleware.Classes
         /// </param>
         public void ReturnMessage(ServerStateSaver serverState)
         {
-            // Add message to the log
-            lock (serverState.serverMessageAdd)
+            try
             {
-                serverState.lb.messageLogList.Add(serverState.returnMsg);
-            }
+                // Add message to the log
+                lock (serverState.serverMessageAdd)
+                {
+                    serverState.lb.messageLogList.Add(serverState.returnMsg);
+                }
 
-            lock (sendLock)
+                lock (sendLock)
+                {
+                    serverState.serverSocket.Send(serverState.returnMsg);
+                }
+            }
+            catch (Exception e)
             {
-                serverState.serverSocket.Send(serverState.returnMsg);
+                e.Message.ToString();
             }
         }
     }

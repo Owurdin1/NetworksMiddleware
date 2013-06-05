@@ -58,7 +58,9 @@ namespace NetworksLab4Middleware
                     Convert.ToInt32(paceTextbox.Text));
             }
 
+            testDataTextbox.Text += "Starting Server";
             server.Start();
+            testDataTextbox.Text += "Server started";
         }
 
         private void finishButton_Click(object sender, EventArgs e)
