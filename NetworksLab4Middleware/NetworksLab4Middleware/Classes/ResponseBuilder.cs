@@ -52,7 +52,6 @@ namespace NetworksLab4Middleware.Classes
 
             string message = string.Join("|", msgArray);
 
-            //byte[] msgByte = System.Text.Encoding.ASCII.GetBytes(message);
             SetMessageLength(System.Text.Encoding.ASCII.GetBytes(message));
         }
 

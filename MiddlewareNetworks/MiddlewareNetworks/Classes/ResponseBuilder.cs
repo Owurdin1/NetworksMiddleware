@@ -8,28 +8,6 @@ namespace MiddlewareNetworks.Classes
 {
     class ResponseBuilder
     {
-        // class private variables
-        //private string msg = String.Empty;
-
-        /// <summary>
-        /// non default constructor, 
-        /// only use this one to implement
-        /// ResponseBuilder class
-        /// </summary>
-        /// <param name="msg">
-        /// message form the client
-        /// </param>
-        //public ResponseBuilder(SocketState sockState)
-        //{
-        //    string msg = System.Text.Encoding.ASCII.GetString(sockState.incomingBuffer);
-        //    string[] msgArray = msg.Split('|');
-
-        //    if (msgArray.Length < 14)
-        //    {
-        //        //System.Windows.Forms.MessageBox.Show("ERROR: Message sent from client is invalid");
-        //    }
-        //}
-
         /// <summary>
         /// Builds response message and prepares byte array
         /// </summary>
@@ -39,32 +17,26 @@ namespace MiddlewareNetworks.Classes
         /// <returns>
         /// formatted byte array
         /// </returns>
-        public byte[] Response(SocketState sockState)
-            //int count, string msTimeStamp,
-            //string foreignHostIP, string serverSocketNumber, string serverIPAddress)
+        public byte[] Response(SocketState sockState, byte[] byteMessage)
         {
-            //    System.Text.Encoding.ASCII.GetString(messageBuffer));
-            //processedBuffer = rb.Response(sockState.incomingNumber,
-            //    sockState.stpWatch.ElapsedMilliseconds.ToString(),
-            //    sockState.sock.RemoteEndPoint.AddressFamily.ToString(),
-            //    sockState.sock.Handle.ToString(),
-            //    localServerIP);
             byte[] msgByte = null;
 
-            string msg = System.Text.Encoding.ASCII.GetString(sockState.incomingBuffer);
+            //string msg = System.Text.Encoding.ASCII.GetString(sockState.incomingBuffer);
+            string msg = System.Text.Encoding.ASCII.GetString(byteMessage);
             string[] msgArray = msg.Split('|');
 
             msgArray[0] = "RSP";
-            msgArray[1] = sockState.stpWatch.ElapsedMilliseconds.ToString(); //msTimeStamp;
-            msgArray[6] = sockState.sock.RemoteEndPoint.AddressFamily.ToString(); // foreignHostIP;
+            msgArray[1] = sockState.stpWatch.ElapsedMilliseconds.ToString();
+            msgArray[6] = sockState.sock.RemoteEndPoint.AddressFamily.ToString();
             msgArray[7] = "2605";
-            msgArray[8] = sockState.sock.Handle.ToString(); // serverSocketNumber;
-            msgArray[9] = sockState.serverIPAddress1.ToString();
-            msgArray[11] = "OW " + sockState.incomingNumber.ToString(); // count.ToString();
+            msgArray[8] = sockState.sock.Handle.ToString();
+            msgArray[9] = sockState.clientState.serverIPAddress1.ToString();
+            msgArray[11] = "OWMid " + sockState.incomingNumber.ToString();
 
             string message = String.Empty;
 
             message = string.Join("|", msgArray);
+            message.ToString();
 
             msgByte = System.Text.Encoding.ASCII.GetBytes(message);
 

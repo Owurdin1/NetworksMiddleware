@@ -58,17 +58,17 @@
             // 
             // paceTextbox
             // 
-            this.paceTextbox.Location = new System.Drawing.Point(141, 96);
+            this.paceTextbox.Location = new System.Drawing.Point(273, 96);
             this.paceTextbox.Name = "paceTextbox";
             this.paceTextbox.Size = new System.Drawing.Size(100, 20);
-            this.paceTextbox.TabIndex = 2;
+            this.paceTextbox.TabIndex = 3;
             // 
             // msgCountTextbox
             // 
-            this.msgCountTextbox.Location = new System.Drawing.Point(269, 96);
+            this.msgCountTextbox.Location = new System.Drawing.Point(141, 96);
             this.msgCountTextbox.Name = "msgCountTextbox";
             this.msgCountTextbox.Size = new System.Drawing.Size(100, 20);
-            this.msgCountTextbox.TabIndex = 3;
+            this.msgCountTextbox.TabIndex = 2;
             // 
             // server1IPTextbox
             // 
@@ -86,7 +86,7 @@
             // 
             // deviceListTextbox
             // 
-            this.deviceListTextbox.Location = new System.Drawing.Point(13, 176);
+            this.deviceListTextbox.Location = new System.Drawing.Point(16, 176);
             this.deviceListTextbox.Name = "deviceListTextbox";
             this.deviceListTextbox.Size = new System.Drawing.Size(357, 107);
             this.deviceListTextbox.TabIndex = 8;
@@ -159,7 +159,7 @@
             // paceLabel
             // 
             this.paceLabel.AutoSize = true;
-            this.paceLabel.Location = new System.Drawing.Point(141, 80);
+            this.paceLabel.Location = new System.Drawing.Point(273, 80);
             this.paceLabel.Name = "paceLabel";
             this.paceLabel.Size = new System.Drawing.Size(32, 13);
             this.paceLabel.TabIndex = 13;
@@ -168,7 +168,7 @@
             // msgCoungLabel
             // 
             this.msgCoungLabel.AutoSize = true;
-            this.msgCoungLabel.Location = new System.Drawing.Point(269, 80);
+            this.msgCoungLabel.Location = new System.Drawing.Point(141, 80);
             this.msgCoungLabel.Name = "msgCoungLabel";
             this.msgCoungLabel.Size = new System.Drawing.Size(81, 13);
             this.msgCoungLabel.TabIndex = 14;

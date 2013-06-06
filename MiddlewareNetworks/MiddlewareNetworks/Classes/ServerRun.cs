@@ -22,6 +22,8 @@ namespace MiddlewareNetworks.Classes
         private int pace;
         private string endPoint2;
         private Socket sock = null;
+        private Object incomingLbAdd = new Object();
+        private Object proccessedLbAdd = new Object();
 
         /// <summary>
         /// Non-Default constructor, this is called for only 
@@ -88,6 +90,25 @@ namespace MiddlewareNetworks.Classes
         }
 
         /// <summary>
+        /// Sets up the socket object before allowing it to
+        /// be assigned to the SocketState object
+        /// </summary>
+        private void SetSock()
+        {
+            // Get local information
+            IPHostEntry localIP = Dns.GetHostEntry(Dns.GetHostName());
+            IPEndPoint localEndPoint = new IPEndPoint(
+                localIP.AddressList[wirelessNicIndex], PORT);
+            IPAddress localServerIP = IPAddress.Parse(localEndPoint.ToString().Split(':')[0]);
+
+            // Set up host socket
+            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
+                ProtocolType.Tcp);
+            sock.Bind(localEndPoint);
+            sock.Listen((int)SocketOptionName.MaxConnections);
+        }
+
+        /// <summary>
         /// Accepts connections and spawns thread to handle them
         /// </summary>
         private void AcceptConnections()
@@ -106,10 +127,28 @@ namespace MiddlewareNetworks.Classes
                     e.Message.ToString();
                 }
 
+                // create and setup socket state saver
                 SocketState sockState = new SocketState();
-                sockState.serverIPAddress1 = IPAddress.Parse(endPoint1);
+                sockState.clientState.serverIPAddress1 = IPAddress.Parse(endPoint1);
+                sockState.clientState.messageCount = msgCount;
+                sockState.clientState.pace = pace;
                 sockState.sock = socket;
+                sockState.clientState.clientSock = socket;
+
+                // set up the client socket
+                ClientRun cr = new ClientRun();
+                sockState.clientState.serverSock = cr.SetClientSocket(sockState.clientState);
+                //Socket endPointSocket = cr.SetClientSocket(sockState.clientState);
+
+                // start the timer
                 sockState.stpWatch.Start();
+
+                // Spawn thread and listen on endpoint connection
+                sockState.clientState.serverThread = new Thread(delegate()
+                    {
+                        cr.ClientReceive(sockState.clientState);
+                    });
+                sockState.clientState.serverThread.Start();
 
                 // Spawns thread and starts ConnectionHandler function
                 sockState.thread = new Thread(delegate()
@@ -148,7 +187,8 @@ namespace MiddlewareNetworks.Classes
                     // Current message receive
                     int offSet = 0;
                     int size = 0;
-
+                    byte[] messageBuffer;
+                    
                     lock (sockState.receiveLock)
                     {
                         bytesRead = sockState.sock.Receive(buffer, offSet, LENGTH_BITS, SocketFlags.None);
@@ -180,21 +220,32 @@ namespace MiddlewareNetworks.Classes
                     }
 
                     // Set messageBuffer to new byte[] with size index
-                    sockState.incomingBuffer = new byte[size];
+                    //sockState.incomingBuffer = new byte[size];
+                    messageBuffer = new byte[size];
+
+                    // Increment the message count
+                    messageCount++;
+                    sockState.incomingNumber = messageCount;
 
                     // Copy message to messageBuffer
-                    Array.Copy(buffer, offSet, sockState.incomingBuffer, 0, size);
+                    //Array.Copy(buffer, offSet, sockState.incomingBuffer, 0, size);
+                    Array.Copy(buffer, offSet, messageBuffer, 0, size);
+
+                    lock (incomingLbAdd)
+                    {
+                        // Add the incoming message to the logbuilder list
+                        //sockState.clientState.lb.incomingMessages.Add(sockState.incomingBuffer);
+                        sockState.clientState.lb.incomingMessages.Add(messageBuffer);
+                    }
 
                     // Send message off, exit do while
                     Thread senderThread = new Thread(delegate()
                     {
                         //SendFunction(messageBuffer, sockState);
-                        SendFunction(sockState);
+                        SendFunction(sockState, messageBuffer);
                     });
-                    senderThread.Start();
 
-                    // Increment the message count
-                    messageCount++;
+                    senderThread.Start();
                 }
             }
             catch (Exception e)
@@ -213,46 +264,64 @@ namespace MiddlewareNetworks.Classes
         /// <param name="sockState">
         /// SocketState state saver object
         /// </param>
-        private void SendFunction(SocketState sockState)
+        private void SendFunction(SocketState sockState, byte[] messageBuffer)
         {
-            byte[] processedBuffer;
-
-            // Process the incoming message and prepares it for response
-            sockState.incomingNumber++;
             try
             {
+                byte[] processedMessage;
+                // Have processed client message
+                // need to forward this to the endpoint
+                // on another socket
                 ResponseBuilder rb = new ResponseBuilder();
-                processedBuffer = rb.Response(sockState);
+                //sockState.clientState.processedMessage = rb.Response(sockState);
+                processedMessage = rb.Response(sockState, messageBuffer);                
 
-                lock (sockState.sendLock)
+                lock (proccessedLbAdd)
                 {
-                    // Send message back to the client
-                    sockState.sock.Send(processedBuffer);
+                    // Add the processed message to the logbuilder
+                    //sockState.clientState.lb.processedMessages.Add(sockState.clientState.processedMessage);
+                    sockState.clientState.lb.processedMessages.Add(processedMessage);
                 }
+
+                
+
+                // pass message to endpoint
+                ClientRun cr = new ClientRun();
+                Thread clientSendThread = new Thread(delegate()
+                    {
+                        cr.ClientSend(sockState.clientState, processedMessage);
+                    });
+                clientSendThread.Start();
+
+
+
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //lock (sockState.clientState.clientSendLock)
+                //{
+                //    // Send message back to the client
+                //    //sockState.sock.Send(sockState.clientState.processedMessage);
+                //    sockState.sock.Send(processedMessage);
+                //}
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
             }
             catch (Exception e)
             {
                 e.ToString();
             }
-        }
-
-        /// <summary>
-        /// Sets up the socket object before allowing it to
-        /// be assigned to the SocketState object
-        /// </summary>
-        private void SetSock()
-        {
-            // Get local information
-            IPHostEntry localIP = Dns.GetHostEntry(Dns.GetHostName());
-            IPEndPoint localEndPoint = new IPEndPoint(
-                localIP.AddressList[wirelessNicIndex], PORT);
-            IPAddress localServerIP = IPAddress.Parse(localEndPoint.ToString().Split(':')[0]);
-
-            // Set up host socket
-            sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
-                ProtocolType.Tcp);
-            sock.Bind(localEndPoint);
-            sock.Listen((int)SocketOptionName.MaxConnections);
         }
     }
 }
