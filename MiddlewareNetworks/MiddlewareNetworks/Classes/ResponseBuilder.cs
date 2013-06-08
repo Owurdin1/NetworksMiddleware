@@ -31,7 +31,8 @@ namespace MiddlewareNetworks.Classes
             msgArray[7] = "2605";
             msgArray[8] = sockState.sock.Handle.ToString();
             msgArray[9] = sockState.clientState.serverIPAddress1.ToString();
-            msgArray[11] = "OWMid " + sockState.incomingNumber.ToString();
+            msgArray[11] = "OWMid " + sockState.responseBuildCount.ToString();
+            sockState.responseBuildCount++;
 
             string message = String.Empty;
 

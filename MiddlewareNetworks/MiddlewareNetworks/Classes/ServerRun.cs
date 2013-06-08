@@ -183,15 +183,20 @@ namespace MiddlewareNetworks.Classes
             try
             {
                 while (true)
+                //while (sockState.incomingNumber < sockState.clientState.messageCount)
+                //do
                 {
                     // Current message receive
                     int offSet = 0;
                     int size = 0;
                     byte[] messageBuffer;
-                    
+
                     lock (sockState.receiveLock)
                     {
-                        bytesRead = sockState.sock.Receive(buffer, offSet, LENGTH_BITS, SocketFlags.None);
+                        //while (bytesRead < 2)
+                        //{
+                            bytesRead = sockState.sock.Receive(buffer, offSet, LENGTH_BITS, SocketFlags.None);
+                        //}
                     }
                     if (bytesRead == 0)
                     {
@@ -215,8 +220,11 @@ namespace MiddlewareNetworks.Classes
 
                     lock (sockState.receiveLock)
                     {
-                        // Read next message out of buffer
-                        bytesRead = sockState.sock.Receive(buffer, offSet, size, SocketFlags.None);
+                        //while (bytesRead < size)
+                        //{
+                            // Read next message out of buffer
+                            bytesRead = sockState.sock.Receive(buffer, offSet, size, SocketFlags.None);
+                        //}
                     }
 
                     // Set messageBuffer to new byte[] with size index
@@ -250,10 +258,11 @@ namespace MiddlewareNetworks.Classes
             }
             catch (Exception e)
             {
-                e.Message.ToString();
+                //e.Message.ToString();
+                System.Windows.Forms.MessageBox.Show("ServerRun.ConnectionHandler\r\n" + e.Message.ToString());
             }
 
-            sockState.sock.Close();
+            //sockState.sock.Close();
         }
 
         /// <summary>
@@ -303,6 +312,16 @@ namespace MiddlewareNetworks.Classes
                 // =---------------------------------------
                 //-========================================
                 // =---------------------------------------
+                //Thread reRoute = new Thread(delegate()
+                //{
+                //    cr.RouteMessage(sockState.clientState, processedMessage);
+                //});
+                //reRoute.Start();
+                //-========================================
+                // =---------------------------------------
+                //-========================================
+                // =---------------------------------------
+                //-========================================
                 //lock (sockState.clientState.clientSendLock)
                 //{
                 //    // Send message back to the client
@@ -321,6 +340,7 @@ namespace MiddlewareNetworks.Classes
             catch (Exception e)
             {
                 e.ToString();
+                System.Windows.Forms.MessageBox.Show("ServerRun.SendFunction\r\n" + e.Message.ToString());
             }
         }
     }

@@ -15,7 +15,7 @@ namespace MiddlewareNetworks.Classes
         private const int BUFFER_SIZE = 256;
 
         // private global variables
-        private System.Net.IPAddress endPointIP = null;
+        //private System.Net.IPAddress endPointIP = null;
         private Object forwardMessageLock = new Object();
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace MiddlewareNetworks.Classes
         /// </returns>
         internal System.Net.Sockets.Socket SetClientSocket(ClientState clientState)
         {
-            endPointIP = clientState.serverIPAddress1;
+            //endPointIP = clientState.serverIPAddress1;
             Connect(clientState);
 
             return clientState.serverSock;
@@ -51,7 +51,8 @@ namespace MiddlewareNetworks.Classes
 
             try
             {
-                sock.Connect(endPointIP, PORT);
+                //sock.Connect(endPointIP, PORT);
+                sock.Connect(clientState.serverIPAddress1, PORT);
 
                 sock.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp,
                     System.Net.Sockets.SocketOptionName.NoDelay, true);
@@ -61,6 +62,7 @@ namespace MiddlewareNetworks.Classes
             catch (Exception e)
             {
                 e.Message.ToString();
+                System.Windows.Forms.MessageBox.Show("Connect Function \r\n" + e.Message.ToString());
             }
         }
 
@@ -72,8 +74,8 @@ namespace MiddlewareNetworks.Classes
         /// clientstate object</param>
         internal void ClientReceive(ClientState clientState)
         {
-            //try
-            //{
+            try
+            {
                 int receivedMessages = 0;
                 byte[] byteSize = new byte[LENGTH_BITS];
                 //clientState.serverBuffer = new byte[BUFFER_SIZE];
@@ -82,55 +84,79 @@ namespace MiddlewareNetworks.Classes
 
                 while (receivedMessages < clientState.messageCount)
                 {
-                    int offset = 0;
-                    int size = 0;
+                    //int offset = 0;
+                    //int size = 0;
                     int bytesRead = 0;
-                    //clientState.serverSock.ReceiveTimeout = 2000;
 
-                    //bytesRead = clientState.serverSock.Receive(clientState.serverBuffer, offset,
-                    //    LENGTH_BITS, System.Net.Sockets.SocketFlags.None);
-                    bytesRead = clientState.serverSock.Receive(serverBuffer, offset,
-                        LENGTH_BITS, System.Net.Sockets.SocketFlags.None);
+                    #region savedBad
+                    ////clientState.serverSock.ReceiveTimeout = 2000;
 
-                    //Array.Copy(clientState.serverBuffer, offset, byteSize, 0, LENGTH_BITS);
-                    Array.Copy(serverBuffer, offset, byteSize, 0, LENGTH_BITS);
+                    //////bytesRead = clientState.serverSock.Receive(clientState.serverBuffer, offset,
+                    //////    LENGTH_BITS, System.Net.Sockets.SocketFlags.None);
+                    ////while (bytesRead < 2)
+                    ////{
+                    //    bytesRead = clientState.serverSock.Receive(serverBuffer, offset,
+                    //        LENGTH_BITS, System.Net.Sockets.SocketFlags.None);
+                    ////}
 
-                    if (BitConverter.IsLittleEndian)
+                    ////Array.Copy(clientState.serverBuffer, offset, byteSize, 0, LENGTH_BITS);
+                    //Array.Copy(serverBuffer, offset, byteSize, 0, LENGTH_BITS);
+
+                    //if (BitConverter.IsLittleEndian)
+                    //{
+                    //    Array.Reverse(byteSize);
+                    //}
+
+                    //size = BitConverter.ToInt16(byteSize, 0);
+                    //offset += LENGTH_BITS;
+
+                    //////bytesRead = clientState.serverSock.Receive(clientState.serverBuffer, offset,
+                    //////    size, System.Net.Sockets.SocketFlags.None);
+                    ////while (bytesRead < size)
+                    ////{
+                    //    bytesRead = clientState.serverSock.Receive(serverBuffer, offset,
+                    //        size, System.Net.Sockets.SocketFlags.None);
+                    ////}
+
+                    ////clientState.forwardMessage = new byte[bytesRead];
+                    ////clientState.forwardMessage = new byte[bytesRead];
+                    ////Array.Copy(clientState.serverBuffer, offset, clientState.forwardMessage, 0, bytesRead);
+                    //byte[] forwardMessage = new byte[bytesRead];
+                    ////Array.Copy(serverBuffer, offset, forwardMessage, 0, bytesRead);
+                    //Array.Copy(serverBuffer, 0, forwardMessage, 0, bytesRead);
+
+                    ////clientState.lb.routedMessages.Add(clientState.forwardMessage);
+                    //clientState.lb.routedMessages.Add(forwardMessage);
+                    #endregion
+
+                    lock (clientState.serverReceiveLock)
                     {
-                        Array.Reverse(byteSize);
+                        bytesRead = clientState.serverSock.Receive(serverBuffer);
                     }
 
-                    size = BitConverter.ToInt16(byteSize, 0);
-                    offset += LENGTH_BITS;
-
-                    //bytesRead = clientState.serverSock.Receive(clientState.serverBuffer, offset,
-                    //    size, System.Net.Sockets.SocketFlags.None);
-                    bytesRead = clientState.serverSock.Receive(serverBuffer, offset,
-                        size, System.Net.Sockets.SocketFlags.None);
-
-                    //clientState.forwardMessage = new byte[bytesRead];
-                    //clientState.forwardMessage = new byte[bytesRead];
-                    //Array.Copy(clientState.serverBuffer, offset, clientState.forwardMessage, 0, bytesRead);
                     byte[] forwardMessage = new byte[bytesRead];
-                    //Array.Copy(serverBuffer, offset, forwardMessage, 0, bytesRead);
-                    Array.Copy(serverBuffer, 0, forwardMessage, 0, bytesRead);
-
-                    //clientState.lb.routedMessages.Add(clientState.forwardMessage);
-                    clientState.lb.routedMessages.Add(forwardMessage);
+                    Array.Copy(serverBuffer, forwardMessage, bytesRead);
 
                     receivedMessages++;
 
-                    Thread routeMsgThread = new Thread(delegate()
+                    lock (clientState.clientSendLock)
                     {
-                        RouteMessage(clientState, forwardMessage);
-                    });
-                    routeMsgThread.Start();
+                        clientState.clientSock.Send(forwardMessage);
+                    }
+
+                    //Thread routeMsgThread = new Thread(delegate()
+                    //{
+                    //    RouteMessage(clientState, forwardMessage);
+                    //});
+                    //routeMsgThread.Start();
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    e.Message.ToString();
-            //}
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
+                System.Windows.Forms.MessageBox.Show("ClientRun.ClientReceive function\r\n" + e.Message.ToString());
+                Thread.Sleep(5000);
+            }
 
             //routeMsgThread.Join();
 
@@ -144,6 +170,7 @@ namespace MiddlewareNetworks.Classes
         /// ClientState object
         /// </param>
         private void RouteMessage(ClientState clientState, byte[] forwardMessage)
+        //internal void RouteMessage(ClientState clientState, byte[] forwardMessage)
         {
             try
             {
@@ -151,12 +178,13 @@ namespace MiddlewareNetworks.Classes
                 {
                     //clientState.clientSock.Send(clientState.forwardMessage);
                     clientState.clientSock.Send(forwardMessage);
+                    //clientState.clientSock.Send(forwardMessage, forwardMessage.Length, System.Net.Sockets.SocketFlags.None);
                 }
             }
             catch (Exception e)
             {
-                string byteME = System.Text.Encoding.ASCII.GetString(forwardMessage);
                 e.Message.ToString();
+                System.Windows.Forms.MessageBox.Show("ClientRun.RouteMessage\r\n" + e.Message.ToString());
             }
         }
 
@@ -177,7 +205,7 @@ namespace MiddlewareNetworks.Classes
                 lock (clientState.serverSendLock)
                 {
                     //clientState.serverSock.Send(clientState.processedMessage);
-                    clientState.serverSock.Send(sendMsg);
+                    clientState.serverSock.Send(sendMsg, sendMsg.Length, System.Net.Sockets.SocketFlags.None);
                 }
 
                 clientState.serverSentCounter++;
@@ -185,6 +213,7 @@ namespace MiddlewareNetworks.Classes
             catch (Exception e)
             {
                 e.Message.ToString();
+                //System.Windows.Forms.MessageBox.Show("ClientRun.ClientSend\r\n" + e.Message.ToString());
             }
         }
     }

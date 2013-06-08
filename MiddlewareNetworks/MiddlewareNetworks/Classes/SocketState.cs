@@ -9,6 +9,7 @@ namespace MiddlewareNetworks.Classes
     class SocketState
     {
         public int incomingNumber = 0;  // Incoming message counter
+        public int responseBuildCount = 0; // counter for student data
         public System.Net.Sockets.Socket sock = null; // socket containing client side connection
         public System.Diagnostics.Stopwatch stpWatch = new System.Diagnostics.Stopwatch();
         public System.Threading.Thread thread; // thread tied to connection handler function
